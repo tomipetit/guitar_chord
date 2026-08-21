@@ -18,10 +18,12 @@ export function CapoSelector({ capo, onSelect }: Props) {
             key={position}
             type="button"
             className="chip chip--capo"
+            // 数字だけだとテンションのボタンと読み上げ上区別が付かない
+            aria-label={position === 0 ? 'カポなし' : `カポ ${position}フレット`}
             aria-pressed={capo === position}
             onClick={() => onSelect(position)}
           >
-            {position === 0 ? 'なし' : position}
+            {position === 0 ? '—' : position}
           </button>
         ))}
       </div>

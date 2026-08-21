@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useReducer, useState } from 'react';
+import { FavoriteBar } from './components/controls/FavoriteBar';
 import { MicButton } from './components/controls/MicButton';
 import { CapoSelector } from './components/selectors/CapoSelector';
 import { VoiceSheet } from './components/controls/VoiceSheet';
@@ -9,10 +10,12 @@ import { SelectorPanel } from './components/selectors/SelectorPanel';
 import { TensionSelector } from './components/selectors/TensionSelector';
 import { shapeSelectionFor } from './domain/capo';
 import { chordName } from './domain/chord/naming';
+import type { ChordSelection } from './domain/chord/types';
 import { isConfident, parseChordCandidates, type ParsedChord } from './domain/speech/parse';
 import { voicingsForSelection } from './domain/voicing/generate';
 import { useSpeechRecognition } from './platform/recognition/useSpeechRecognition';
 import { chordReducer, initialChordState } from './state/chordSelection';
+import { useFavorites } from './state/useFavorites';
 
 export function App() {
   const [state, dispatch] = useReducer(chordReducer, initialChordState);
@@ -26,12 +29,19 @@ export function App() {
   const voicings = useMemo(() => voicingsForSelection(shapeSelection), [shapeSelection]);
   const safeIndex = Math.min(voicingIndex, voicings.length - 1);
 
-  const applyCandidate = useCallback((candidate: ParsedChord) => {
-    dispatch({ type: 'APPLY_SELECTION', selection: candidate.selection });
-    // 音声で指定した時点でコードは確定しているので、表示に画面を譲る
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+
+  /** 一覧以外（音声・お気に入り）からコードを決めたとき。確定しているので表示に画面を譲る */
+  const applySelection = useCallback((next: ChordSelection) => {
+    dispatch({ type: 'APPLY_SELECTION', selection: next });
     setSelectorOpen(false);
     setCandidates(null);
   }, []);
+
+  const applyCandidate = useCallback(
+    (candidate: ParsedChord) => applySelection(candidate.selection),
+    [applySelection],
+  );
 
   const speech = useSpeechRecognition({
     onResult: (transcripts) => {
@@ -63,6 +73,15 @@ export function App() {
           <MicButton listening={speech.listening} onStart={startVoice} onStop={speech.stop} />
         )}
       </header>
+
+      {favorites.length > 0 && (
+        <FavoriteBar
+          favorites={favorites}
+          current={selection}
+          accidental={accidental}
+          onSelect={applySelection}
+        />
+      )}
 
       <main className="app__main">
         <SelectorPanel
@@ -106,6 +125,8 @@ export function App() {
           voicings={voicings}
           voicingIndex={safeIndex}
           onSelectVoicing={(index) => dispatch({ type: 'SELECT_VOICING', index })}
+          favorite={isFavorite(selection)}
+          onToggleFavorite={() => toggleFavorite(selection)}
         />
       </main>
 

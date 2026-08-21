@@ -10,6 +10,7 @@ import {
   type Voicing,
 } from '../../domain/voicing/types';
 import { useChordPlayer } from '../../platform/audio/useChordPlayer';
+import { FavoriteButton } from '../controls/FavoriteButton';
 import { PlaybackControls } from '../controls/PlaybackControls';
 import { ChordDiagram } from '../diagram/ChordDiagram';
 
@@ -22,6 +23,8 @@ interface Props {
   voicings: Voicing[];
   voicingIndex: number;
   onSelectVoicing: (index: number) => void;
+  favorite: boolean;
+  onToggleFavorite: () => void;
 }
 
 export function ChordResult({
@@ -32,6 +35,8 @@ export function ChordResult({
   voicings,
   voicingIndex,
   onSelectVoicing,
+  favorite,
+  onToggleFavorite,
 }: Props) {
   const type = chordTypeOf(selection);
   const name = chordName(selection, accidental);
@@ -52,7 +57,10 @@ export function ChordResult({
 
   return (
     <section className="result">
-      <h2 className="result__name">{name}</h2>
+      <div className="result__heading">
+        <h2 className="result__name">{name}</h2>
+        <FavoriteButton active={favorite} chordLabel={name} onToggle={onToggleFavorite} />
+      </div>
 
       {capo > 0 && (
         <p className="result__capo">
