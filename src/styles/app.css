@@ -266,7 +266,9 @@ body {
 }
 
 .result__name {
+  width: 100%;
   margin: 0;
+  text-align: center;
   font-size: 3rem;
   font-weight: 700;
   line-height: 1;
@@ -472,16 +474,12 @@ body {
   color: var(--accent);
 }
 
-.result__heading {
+.result__actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-}
-
-.result__heading .result__name {
-  min-width: 0;
+  gap: 8px;
+  margin-top: -4px;
 }
 
 .favorite-button {

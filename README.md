@@ -50,7 +50,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 
 - [x] Phase 0: プロジェクト雛形・テスト・デプロイ設定
 - [x] Phase 1: コード選択 UI とダイアグラム表示（スマホではコード指定エリアを開閉式にして表示領域を確保）
-- [x] Phase 2: Web Audio API による音の確認（ストローク / アルペジオ / 同時、弦の個別タップ）
+- [x] Phase 2: Web Audio API による音の確認（ストローク / アルペジオ、弦の個別タップ）
 - [x] Phase 3: 音声入力（「いーまいなー」→ Em）
 - [x] Phase 4: 表示の作り込み（フォームの並び順、ダイアグラム、レスポンシブ）
 - [x] Phase 5: PWA 化（オフライン動作）、カポ対応、お気に入り
@@ -77,7 +77,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 ノイズを 1 周期ぶん詰めた遅延線をローパス付きで循環させると、任意のピッチの弦の音が得られる。
 
 - `src/platform/audio/player.ts` — AudioContext の遅延生成（iOS の自動再生制限対策）、
-  ストローク / アルペジオ / 同時の発音スケジュール、フェードアウト付きの停止
+  ストローク / アルペジオの発音スケジュール、フェードアウト付きの停止
 - `src/platform/audio/useChordPlayer.ts` — React から使うためのフック
 - ダイアグラムの弦をタップすると、その弦の音だけを鳴らせる
 

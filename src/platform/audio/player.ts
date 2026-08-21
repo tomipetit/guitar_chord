@@ -1,19 +1,17 @@
 import { midiToFrequency } from '../../domain/pitch';
 import { renderPluck } from './pluck';
 
-export type PlaybackMode = 'strum' | 'arpeggio' | 'together';
+export type PlaybackMode = 'strum' | 'arpeggio';
 
 export const PLAYBACK_MODES: { id: PlaybackMode; label: string }[] = [
   { id: 'strum', label: 'ストローク' },
   { id: 'arpeggio', label: 'アルペジオ' },
-  { id: 'together', label: '同時' },
 ];
 
 /** 6弦→1弦の発音間隔（秒） */
 const STAGGER_SECONDS: Record<PlaybackMode, number> = {
   strum: 0.035,
   arpeggio: 0.28,
-  together: 0,
 };
 
 const NOTE_DURATION_SECONDS = 2.6;

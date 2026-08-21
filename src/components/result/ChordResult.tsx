@@ -70,8 +70,10 @@ export function ChordResult({
 
   return (
     <section className="result">
-      <div className="result__heading">
-        <h2 className="result__name">{name}</h2>
+      {/* コード名は常に単独行。左右にボタンを置くと中央からずれる */}
+      <h2 className="result__name">{name}</h2>
+
+      <div className="result__actions">
         <button
           type="button"
           className="minor-toggle"
