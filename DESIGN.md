@@ -385,7 +385,7 @@ Phase 1 だけで「表示するだけのアプリ」として完成する構成
 
 | 項目 | 値 |
 |---|---|
-| Framework preset | Vite |
+| Framework preset | None（プリセットは使わず下の 2 つを直接入力する） |
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Node.js version | `.node-version`（22） |

@@ -24,10 +24,12 @@ Cloudflare ダッシュボード → Workers & Pages → Create → Pages → Co
 
 | 項目 | 値 |
 |---|---|
-| Framework preset | Vite |
+| Framework preset | None（プリセットは使わず下の 2 つを直接入力する） |
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Node.js version | `.node-version`（22）を自動で参照 |
+
+VitePress プリセットは選ばないこと（Build command が `npm run docs:build`、出力先が `.vitepress/dist` になり失敗する）。
 
 以降は push するたびに本番／プレビューデプロイが走る。
 
