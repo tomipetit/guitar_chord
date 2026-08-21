@@ -52,7 +52,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 - [x] Phase 1: コード選択 UI とダイアグラム表示（スマホではコード指定エリアを開閉式にして表示領域を確保）
 - [x] Phase 2: Web Audio API による音の確認（ストローク / アルペジオ / 同時、弦の個別タップ）
 - [x] Phase 3: 音声入力（「いーまいなー」→ Em）
-- [ ] Phase 4: 表示の作り込み
+- [x] Phase 4: 表示の作り込み（フォームの並び順、ダイアグラム、レスポンシブ）
 
 ## コードフォームの持ち方
 
@@ -60,7 +60,11 @@ npx wrangler pages deploy dist --project-name guitar-chord
 
 - `src/domain/voicing/shapes.ts` — 6弦ルート（E フォーム）／5弦ルート（A フォーム）をルート相対のオフセットで定義
 - `src/domain/voicing/openChords.ts` — 開放弦を使う定番フォーム（生成結果より押さえやすいので優先表示）
-- `src/domain/voicing/generate.ts` — 上記を合成し、押さえやすい順に並べて重複を除去
+- `src/domain/voicing/generate.ts` — 上記を合成し、重複を除いて押さえやすい順に並べる
+
+並び順はシェイプの種類ではなく負担そのもので決める（`voicingDifficulty`）。
+最低フレット・指の広がり・バレーの有無・開放弦の数から算出するので、
+たとえば Em7 なら `開放 → 5弦ルート 7fr → 6弦ルート 12fr` の順になる。
 
 `src/domain/voicing/generate.test.ts` が全 `root × quality × tension` の組み合わせについて、
 「構成音以外を鳴らしていないか」「ルートと性格音を含むか」「表示幅に収まるか」「運指が破綻していないか」を検証している。

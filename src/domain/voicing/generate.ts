@@ -2,7 +2,7 @@ import type { ChordSelection, ChordType, Root } from '../chord/types';
 import { chordTypeOf, pitchClassOf } from '../chord/types';
 import { openChordFor } from './openChords';
 import { movableShapesFor, type MovableShape } from './shapes';
-import { computeBaseFret, fretsToText, type Voicing } from './types';
+import { computeBaseFret, fretsToText, voicingDifficulty, type Voicing } from './types';
 
 /** ルート弦の index（0 = 6弦）と開放音のピッチクラス */
 const ROOT_STRING: Record<6 | 5, { index: number; pitchClass: number }> = {
@@ -32,8 +32,7 @@ function transpose(shape: MovableShape, rootFret: number): Voicing {
 
 /**
  * コード種別とルートから押弦フォームを生成する。
- * 「開放形テーブル → 6弦ルート → 5弦ルート」の順（＝押さえやすい順）に並べ、
- * 同一フォームは取り除く。
+ * 同一フォームを取り除いたうえで、押さえやすい順に並べて返す。
  */
 export function generateVoicings(root: Root, type: ChordType): Voicing[] {
   const voicings: Voicing[] = [];
@@ -57,12 +56,14 @@ export function generateVoicings(root: Root, type: ChordType): Voicing[] {
   }
 
   const seen = new Set<string>();
-  return voicings.filter((v) => {
+  const unique = voicings.filter((v) => {
     const key = fretsToText(v.frets);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+
+  return unique.sort((a, b) => voicingDifficulty(a) - voicingDifficulty(b));
 }
 
 /** 選択状態から直接フォームを得るショートカット */

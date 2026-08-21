@@ -12,6 +12,9 @@ const GRID_HEIGHT = FRET_GAP * DIAGRAM_FRET_SPAN;
 const WIDTH = PADDING_LEFT + GRID_WIDTH + PADDING_RIGHT;
 const HEIGHT = PADDING_TOP + GRID_HEIGHT + PADDING_BOTTOM;
 
+/** 実際のギターに合わせ、低音弦ほど太く描く（6弦→1弦） */
+const STRING_WIDTHS = [1.9, 1.65, 1.4, 1.2, 1, 0.85];
+
 /** 弦 index（0 = 6弦）の x 座標 */
 const stringX = (index: number) => PADDING_LEFT + index * STRING_GAP;
 /** フレット番号（baseFret 起点）の中心 y 座標 */
@@ -64,13 +67,14 @@ export function ChordDiagram({ voicing, chordLabel, onPluckString }: Props) {
       ))}
 
       {/* 弦 */}
-      {Array.from({ length: 6 }, (_, i) => (
+      {STRING_WIDTHS.map((width, i) => (
         <line
           key={`string-${i}`}
           x1={stringX(i)}
           y1={PADDING_TOP}
           x2={stringX(i)}
           y2={PADDING_TOP + GRID_HEIGHT}
+          strokeWidth={width}
           className="diagram__string"
         />
       ))}

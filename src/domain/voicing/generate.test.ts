@@ -4,7 +4,13 @@ import { INTERVALS, pitchClassesOf } from '../chord/notes';
 import { ROOTS, chordTypeOf, pitchClassOf } from '../chord/types';
 import type { ChordType, Quality, Root } from '../chord/types';
 import { generateVoicings, voicingsForSelection } from './generate';
-import { DIAGRAM_FRET_SPAN, fretsToText, voicingMidiNotes, type Voicing } from './types';
+import {
+  DIAGRAM_FRET_SPAN,
+  fretsToText,
+  voicingDifficulty,
+  voicingMidiNotes,
+  type Voicing,
+} from './types';
 
 const QUALITIES: Quality[] = ['major', 'minor'];
 
@@ -110,6 +116,38 @@ describe('generateVoicings', () => {
         }
       }
     }
+  });
+});
+
+describe('フォームの並び順', () => {
+  it('押さえやすい順に並んでいる', () => {
+    for (const sel of allSelections()) {
+      const difficulties = voicingsForSelection(sel).map(voicingDifficulty);
+      const sorted = [...difficulties].sort((a, b) => a - b);
+      expect(difficulties, JSON.stringify(sel)).toEqual(sorted);
+    }
+  });
+
+  it('開放弦を使うフォームがあれば先頭に来る', () => {
+    for (const sel of allSelections()) {
+      const voicings = voicingsForSelection(sel);
+      const openIndex = voicings.findIndex((v) => v.frets.some((f) => f === 0));
+      if (openIndex === -1) continue;
+      expect(openIndex, `${JSON.stringify(sel)} / ${voicings[0].label}`).toBe(0);
+    }
+  });
+
+  it('ローポジションのバレーがハイポジションより先に来る', () => {
+    expect(generateVoicings('E', 'm7').map((v) => v.label)).toEqual([
+      '開放',
+      '5弦ルート 7fr',
+      '6弦ルート 12fr',
+    ]);
+    expect(generateVoicings('C', 'major').map((v) => v.label)).toEqual([
+      '開放',
+      '5弦ルート 3fr',
+      '6弦ルート 8fr',
+    ]);
   });
 });
 
