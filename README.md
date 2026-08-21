@@ -47,7 +47,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 ## 実装状況
 
 - [x] Phase 0: プロジェクト雛形・テスト・デプロイ設定
-- [x] Phase 1: コード選択 UI とダイアグラム表示
+- [x] Phase 1: コード選択 UI とダイアグラム表示（スマホではコード指定エリアを開閉式にして表示領域を確保）
 - [ ] Phase 2: Web Audio API による音の確認
 - [ ] Phase 3: 音声入力（「いーまいなー」→ Em）
 - [ ] Phase 4: 表示の作り込み

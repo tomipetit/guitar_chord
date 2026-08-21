@@ -57,9 +57,62 @@ body {
   gap: 16px;
 }
 
-.app__steps {
+/* ---- コード指定エリア（スマホでは開閉できる） ---- */
+
+.selector {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+}
+
+.selector__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.selector__toggle-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.selector__toggle-current {
+  margin-left: auto;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* 閉じているとき下向き / 開いているとき上向きの山形 */
+.selector__chevron {
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.selector__toggle[aria-expanded='true'] .selector__chevron {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.selector__steps {
+  display: grid;
+  gap: 10px;
+}
+
+.selector__steps--collapsed {
+  display: none;
 }
 
 /* ---- ステップ ---- */
@@ -201,8 +254,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 16px 12px 20px;
+  gap: 12px;
+  padding: 20px 12px 24px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -210,7 +263,7 @@ body {
 
 .result__name {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.01em;
@@ -225,7 +278,7 @@ body {
 }
 
 .diagram {
-  width: 190px;
+  width: min(100%, 250px);
   height: auto;
 }
 
@@ -325,16 +378,49 @@ body {
   font-weight: 600;
 }
 
+/* ---- 指定エリアを閉じているスマホ表示は、コードをさらに大きく ---- */
+
+@media (max-width: 719px) {
+  .app--focus .result__name {
+    font-size: 3.5rem;
+  }
+
+  .app--focus .diagram {
+    width: min(100%, 300px);
+  }
+
+  .app--focus .result__frets {
+    font-size: 1.125rem;
+  }
+}
+
 /* ---- 横に余裕がある画面 ---- */
 
 @media (min-width: 720px) {
   .app__main {
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 340px;
     align-items: start;
+  }
+
+  /* 開閉の必要がないので操作ごと隠し、常に展開しておく */
+  .selector__toggle {
+    display: none;
+  }
+
+  .selector__steps--collapsed {
+    display: grid;
   }
 
   .result {
     position: sticky;
     top: 12px;
+  }
+
+  .result__name {
+    font-size: 2.5rem;
+  }
+
+  .diagram {
+    width: min(100%, 220px);
   }
 }
