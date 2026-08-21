@@ -51,7 +51,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 - [x] Phase 0: プロジェクト雛形・テスト・デプロイ設定
 - [x] Phase 1: コード選択 UI とダイアグラム表示（スマホではコード指定エリアを開閉式にして表示領域を確保）
 - [x] Phase 2: Web Audio API による音の確認（ストローク / アルペジオ / 同時、弦の個別タップ）
-- [ ] Phase 3: 音声入力（「いーまいなー」→ Em）
+- [x] Phase 3: 音声入力（「いーまいなー」→ Em）
 - [ ] Phase 4: 表示の作り込み
 
 ## コードフォームの持ち方
@@ -77,6 +77,27 @@ npx wrangler pages deploy dist --project-name guitar-chord
 
 `src/platform/audio/pluck.test.ts` が、生成波形が自己相関で狙ったピッチの周期になっていること、
 減衰すること、末尾が振幅 0 で終わる（クリックノイズが出ない）ことを検証している。
+
+## 音声入力
+
+マイクボタンから Web Speech API で聞き取り、コード指定として解釈する。
+
+```
+（音声）「いーまいなー」 → 【コード】Em
+```
+
+- `src/domain/speech/normalize.ts` — NFKC / カタカナ→ひらがな / 記号除去。
+  `M7` と `m7` の区別が消えるため小文字化はしない
+- `src/domain/speech/dictionary.ts` — 読みの辞書。最長一致で走査するので並び順に依存しない
+- `src/domain/speech/parse.ts` — トークン列からコードを組み立て、確信度を付けて返す
+- `src/platform/recognition/` — Web Speech API のラッパ（非対応ならマイク自体を出さない）
+
+認識候補は `maxAlternatives = 5` で複数受け取り、同じコードに畳んで確信度順に並べる。
+候補が 1 つで確信度が高ければ確認なしで適用し、割れたら下からシートを出して選ばせる。
+聞き取った文字列は常に表示するので、誤認識はユーザー側で把握できる。
+
+`src/domain/speech/parse.test.ts` が読みの揺れ・`b` の曖昧性・`M7` / `m7` の区別・
+解釈できない発話の扱いを検証している。
 
 ## 既知の簡略化
 

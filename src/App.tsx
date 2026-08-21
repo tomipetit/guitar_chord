@@ -1,26 +1,63 @@
-import { useMemo, useReducer, useState } from 'react';
+import { useCallback, useMemo, useReducer, useState } from 'react';
+import { MicButton } from './components/controls/MicButton';
+import { VoiceSheet } from './components/controls/VoiceSheet';
 import { ChordResult } from './components/result/ChordResult';
 import { KeySelector } from './components/selectors/KeySelector';
 import { QualitySelector } from './components/selectors/QualitySelector';
 import { SelectorPanel } from './components/selectors/SelectorPanel';
 import { TensionSelector } from './components/selectors/TensionSelector';
 import { chordName } from './domain/chord/naming';
+import { isConfident, parseChordCandidates, type ParsedChord } from './domain/speech/parse';
 import { voicingsForSelection } from './domain/voicing/generate';
+import { useSpeechRecognition } from './platform/recognition/useSpeechRecognition';
 import { chordReducer, initialChordState } from './state/chordSelection';
 
 export function App() {
   const [state, dispatch] = useReducer(chordReducer, initialChordState);
   const [selectorOpen, setSelectorOpen] = useState(true);
+  const [candidates, setCandidates] = useState<ParsedChord[] | null>(null);
   const { root, quality, tension, accidental, voicingIndex } = state;
 
   const selection = useMemo(() => ({ root, quality, tension }), [root, quality, tension]);
   const voicings = useMemo(() => voicingsForSelection(selection), [selection]);
   const safeIndex = Math.min(voicingIndex, voicings.length - 1);
 
+  const applyCandidate = useCallback((candidate: ParsedChord) => {
+    dispatch({ type: 'APPLY_SELECTION', selection: candidate.selection });
+    // 音声で指定した時点でコードは確定しているので、表示に画面を譲る
+    setSelectorOpen(false);
+    setCandidates(null);
+  }, []);
+
+  const speech = useSpeechRecognition({
+    onResult: (transcripts) => {
+      const parsed = parseChordCandidates(transcripts);
+      // 迷いなく解釈できたときだけ確認を挟まずに適用する
+      if (isConfident(parsed)) applyCandidate(parsed[0]);
+      else setCandidates(parsed);
+    },
+  });
+
+  const closeVoice = () => {
+    speech.stop();
+    speech.clearError();
+    setCandidates(null);
+  };
+
+  const startVoice = () => {
+    setCandidates(null);
+    speech.start();
+  };
+
+  const voiceOpen = speech.listening || candidates !== null || speech.error !== null;
+
   return (
-    <div className={`app${selectorOpen ? "" : " app--focus"}`}>
+    <div className={`app${selectorOpen ? '' : ' app--focus'}`}>
       <header className="app__header">
         <h1 className="app__title">Guitar Chords</h1>
+        {speech.supported && (
+          <MicButton listening={speech.listening} onStart={startVoice} onStop={speech.stop} />
+        )}
       </header>
 
       <main className="app__main">
@@ -60,6 +97,19 @@ export function App() {
           onSelectVoicing={(index) => dispatch({ type: 'SELECT_VOICING', index })}
         />
       </main>
+
+      {speech.supported && voiceOpen && (
+        <VoiceSheet
+          listening={speech.listening}
+          transcript={speech.transcript}
+          error={speech.error}
+          candidates={candidates}
+          accidental={accidental}
+          onPick={applyCandidate}
+          onRetry={startVoice}
+          onClose={closeVoice}
+        />
+      )}
     </div>
   );
 }
