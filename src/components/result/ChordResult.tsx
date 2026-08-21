@@ -15,6 +15,9 @@ import { ChordDiagram } from '../diagram/ChordDiagram';
 
 interface Props {
   selection: ChordSelection;
+  /** カポを付けているとき、実際に押さえるコード */
+  shapeSelection: ChordSelection;
+  capo: number;
   accidental: Accidental;
   voicings: Voicing[];
   voicingIndex: number;
@@ -23,6 +26,8 @@ interface Props {
 
 export function ChordResult({
   selection,
+  shapeSelection,
+  capo,
   accidental,
   voicings,
   voicingIndex,
@@ -42,17 +47,25 @@ export function ChordResult({
   const handlePluckString = (stringIndex: number) => {
     const fret = voicing.frets[stringIndex];
     if (fret === null) return;
-    void pluckString(OPEN_STRING_MIDI[stringIndex] + fret);
+    void pluckString(OPEN_STRING_MIDI[stringIndex] + capo + fret);
   };
 
   return (
     <section className="result">
       <h2 className="result__name">{name}</h2>
 
+      {capo > 0 && (
+        <p className="result__capo">
+          <span className="result__capo-badge">カポ {capo}fr</span>
+          押さえる形は <strong>{chordName(shapeSelection, accidental)}</strong>
+        </p>
+      )}
+
       <ChordDiagram
         voicing={voicing}
         chordLabel={name}
         onPluckString={supported ? handlePluckString : undefined}
+        capo={capo}
       />
 
       <p className="result__frets">{fretsToText(voicing.frets)}</p>
@@ -77,7 +90,7 @@ export function ChordResult({
       {supported && (
         <PlaybackControls
           playing={playing}
-          onPlay={(mode) => void playChord(voicingMidiNotes(voicing).map((n) => n.midi), mode)}
+          onPlay={(mode) => void playChord(voicingMidiNotes(voicing, capo).map((n) => n.midi), mode)}
           onStop={stop}
         />
       )}

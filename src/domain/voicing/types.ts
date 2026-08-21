@@ -68,9 +68,15 @@ export function voicingDifficulty(voicing: Voicing): number {
   );
 }
 
-/** 実際に鳴る音の MIDI ノート番号（ミュート弦は除外） */
-export function voicingMidiNotes(voicing: Voicing): { stringIndex: number; midi: number }[] {
+/**
+ * 実際に鳴る音の MIDI ノート番号（ミュート弦は除外）。
+ * カポを付けている場合、開放弦も押弦もその ぶんだけ高くなる。
+ */
+export function voicingMidiNotes(
+  voicing: Voicing,
+  capo = 0,
+): { stringIndex: number; midi: number }[] {
   return voicing.frets.flatMap((fret, i) =>
-    fret === null ? [] : [{ stringIndex: i, midi: OPEN_STRING_MIDI[i] + fret }],
+    fret === null ? [] : [{ stringIndex: i, midi: OPEN_STRING_MIDI[i] + capo + fret }],
   );
 }

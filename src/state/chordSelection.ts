@@ -7,6 +7,8 @@ export interface ChordState extends ChordSelection {
   accidental: Accidental;
   /** 表示中のフォーム（generateVoicings の添字） */
   voicingIndex: number;
+  /** カポの位置（0 = 付けていない）。選ぶコードは実音のままで、押さえる形が変わる */
+  capo: number;
 }
 
 export type ChordAction =
@@ -15,6 +17,7 @@ export type ChordAction =
   | { type: 'SELECT_TENSION'; tension: Tension }
   | { type: 'SELECT_VOICING'; index: number }
   | { type: 'SET_ACCIDENTAL'; accidental: Accidental }
+  | { type: 'SET_CAPO'; capo: number }
   | { type: 'APPLY_SELECTION'; selection: ChordSelection };
 
 export const initialChordState: ChordState = {
@@ -23,6 +26,7 @@ export const initialChordState: ChordState = {
   tension: 'none',
   accidental: 'sharp',
   voicingIndex: 0,
+  capo: 0,
 };
 
 export function chordReducer(state: ChordState, action: ChordAction): ChordState {
@@ -47,6 +51,10 @@ export function chordReducer(state: ChordState, action: ChordAction): ChordState
 
     case 'SET_ACCIDENTAL':
       return { ...state, accidental: action.accidental };
+
+    case 'SET_CAPO':
+      // 押さえる形が変わるので、選択中のフォームは先頭に戻す
+      return { ...state, capo: action.capo, voicingIndex: 0 };
 
     case 'APPLY_SELECTION':
       return { ...state, ...action.selection, voicingIndex: 0 };

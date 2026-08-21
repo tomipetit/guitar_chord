@@ -11,3 +11,10 @@ createRoot(container).render(
     <App />
   </StrictMode>,
 );
+
+// オフラインで使えるようにする。登録できなくてもアプリの動作には影響しない
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+  });
+}

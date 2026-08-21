@@ -4,3 +4,7 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Service Worker 自身をキャッシュさせない。更新が届かなくなるため
+/sw.js
+  Cache-Control: no-cache

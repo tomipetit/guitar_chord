@@ -1,11 +1,13 @@
 import { useCallback, useMemo, useReducer, useState } from 'react';
 import { MicButton } from './components/controls/MicButton';
+import { CapoSelector } from './components/selectors/CapoSelector';
 import { VoiceSheet } from './components/controls/VoiceSheet';
 import { ChordResult } from './components/result/ChordResult';
 import { KeySelector } from './components/selectors/KeySelector';
 import { QualitySelector } from './components/selectors/QualitySelector';
 import { SelectorPanel } from './components/selectors/SelectorPanel';
 import { TensionSelector } from './components/selectors/TensionSelector';
+import { shapeSelectionFor } from './domain/capo';
 import { chordName } from './domain/chord/naming';
 import { isConfident, parseChordCandidates, type ParsedChord } from './domain/speech/parse';
 import { voicingsForSelection } from './domain/voicing/generate';
@@ -16,10 +18,12 @@ export function App() {
   const [state, dispatch] = useReducer(chordReducer, initialChordState);
   const [selectorOpen, setSelectorOpen] = useState(true);
   const [candidates, setCandidates] = useState<ParsedChord[] | null>(null);
-  const { root, quality, tension, accidental, voicingIndex } = state;
+  const { root, quality, tension, accidental, voicingIndex, capo } = state;
 
   const selection = useMemo(() => ({ root, quality, tension }), [root, quality, tension]);
-  const voicings = useMemo(() => voicingsForSelection(selection), [selection]);
+  // 選ぶのは鳴らしたい実音。カポを付けている場合、押さえる形はその ぶんだけ低いコードになる
+  const shapeSelection = useMemo(() => shapeSelectionFor(selection, capo), [selection, capo]);
+  const voicings = useMemo(() => voicingsForSelection(shapeSelection), [shapeSelection]);
   const safeIndex = Math.min(voicingIndex, voicings.length - 1);
 
   const applyCandidate = useCallback((candidate: ParsedChord) => {
@@ -64,7 +68,11 @@ export function App() {
         <SelectorPanel
           open={selectorOpen}
           onToggle={() => setSelectorOpen((v) => !v)}
-          currentLabel={chordName(selection, accidental)}
+          currentLabel={
+            capo > 0
+              ? `${chordName(selection, accidental)}・カポ${capo}`
+              : chordName(selection, accidental)
+          }
         >
           <KeySelector
             root={root}
@@ -87,10 +95,13 @@ export function App() {
               setSelectorOpen(false);
             }}
           />
+          <CapoSelector capo={capo} onSelect={(next) => dispatch({ type: 'SET_CAPO', capo: next })} />
         </SelectorPanel>
 
         <ChordResult
           selection={selection}
+          shapeSelection={shapeSelection}
+          capo={capo}
           accidental={accidental}
           voicings={voicings}
           voicingIndex={safeIndex}

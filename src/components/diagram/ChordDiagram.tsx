@@ -25,9 +25,11 @@ interface Props {
   chordLabel: string;
   /** 弦をタップしたとき（0 = 6弦）。ミュート弦では呼ばれない */
   onPluckString?: (stringIndex: number) => void;
+  /** カポの位置。0 より大きければナットをカポとして描く */
+  capo?: number;
 }
 
-export function ChordDiagram({ voicing, chordLabel, onPluckString }: Props) {
+export function ChordDiagram({ voicing, chordLabel, onPluckString, capo = 0 }: Props) {
   const { frets, fingers, barres, baseFret } = voicing;
   const isOpenPosition = baseFret === 1;
 
@@ -46,7 +48,7 @@ export function ChordDiagram({ voicing, chordLabel, onPluckString }: Props) {
           width={GRID_WIDTH + 2}
           height={6}
           rx={2}
-          className="diagram__nut"
+          className={capo > 0 ? 'diagram__nut diagram__nut--capo' : 'diagram__nut'}
         />
       ) : (
         <text x={stringX(0) - 13} y={fretCenterY(0)} className="diagram__base-fret">
