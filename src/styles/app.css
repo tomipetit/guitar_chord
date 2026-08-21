@@ -57,54 +57,7 @@ body {
   gap: 16px;
 }
 
-/* ---- コード指定エリア（スマホでは開閉できる） ---- */
-
-.selector {
-  display: grid;
-  gap: 10px;
-}
-
-.selector__toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.selector__toggle-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.selector__toggle-current {
-  margin-left: auto;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-/* 閉じているとき下向き / 開いているとき上向きの山形 */
-.selector__chevron {
-  width: 9px;
-  height: 9px;
-  border-right: 2px solid var(--text-muted);
-  border-bottom: 2px solid var(--text-muted);
-  transform: translateY(-2px) rotate(45deg);
-  transition: transform 0.15s ease;
-}
-
-.selector__toggle[aria-expanded='true'] .selector__chevron {
-  transform: translateY(2px) rotate(-135deg);
-}
+/* ---- コード指定エリア（スマホではヘッダーのボタンで開閉する） ---- */
 
 .selector__steps {
   display: grid;
@@ -220,8 +173,7 @@ body {
 .toggle__button:focus-visible,
 .forms__tab:focus-visible,
 .playback__play:focus-visible,
-.playback__mode:focus-visible,
-.selector__toggle:focus-visible {
+.playback__mode:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -661,7 +613,13 @@ body {
 
 /* ---- 音声入力 ---- */
 
-.mic {
+.app__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool-button {
   display: grid;
   place-items: center;
   width: 44px;
@@ -673,24 +631,31 @@ body {
   cursor: pointer;
 }
 
-.mic[aria-pressed='true'] {
+.tool-button[aria-pressed='true'],
+.tool-button[aria-expanded='true'] {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--accent-ink);
 }
 
-.mic:focus-visible {
+.tool-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.mic__icon {
+.tool-button__icon {
   width: 22px;
   height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
+}
+
+/* 一覧アイコンの行頭の点だけは塗る */
+.selector-toggle .tool-button__icon circle {
+  fill: currentColor;
+  stroke: none;
 }
 
 .voice {
@@ -845,7 +810,7 @@ body {
   }
 
   /* 開閉の必要がないので操作ごと隠し、常に展開しておく */
-  .selector__toggle {
+  .selector-toggle {
     display: none;
   }
 

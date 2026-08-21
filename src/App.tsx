@@ -6,10 +6,9 @@ import { VoiceSheet } from './components/controls/VoiceSheet';
 import { ChordResult } from './components/result/ChordResult';
 import { KeySelector } from './components/selectors/KeySelector';
 import { QualitySelector } from './components/selectors/QualitySelector';
-import { SelectorPanel } from './components/selectors/SelectorPanel';
+import { SelectorToggle } from './components/selectors/SelectorToggle';
 import { TensionSelector } from './components/selectors/TensionSelector';
 import { shapeSelectionFor } from './domain/capo';
-import { chordName } from './domain/chord/naming';
 import type { ChordSelection } from './domain/chord/types';
 import { isConfident, parseChordCandidates, type ParsedChord } from './domain/speech/parse';
 import { voicingsForSelection } from './domain/voicing/generate';
@@ -69,9 +68,12 @@ export function App() {
     <div className={`app${selectorOpen ? '' : ' app--focus'}`}>
       <header className="app__header">
         <h1 className="app__title">Guitar Chords</h1>
-        {speech.supported && (
-          <MicButton listening={speech.listening} onStart={startVoice} onStop={speech.stop} />
-        )}
+        <div className="app__tools">
+          <SelectorToggle open={selectorOpen} onToggle={() => setSelectorOpen((v) => !v)} />
+          {speech.supported && (
+            <MicButton listening={speech.listening} onStart={startVoice} onStop={speech.stop} />
+          )}
+        </div>
       </header>
 
       {favorites.length > 0 && (
@@ -84,14 +86,9 @@ export function App() {
       )}
 
       <main className="app__main">
-        <SelectorPanel
-          open={selectorOpen}
-          onToggle={() => setSelectorOpen((v) => !v)}
-          currentLabel={
-            capo > 0
-              ? `${chordName(selection, accidental)}・カポ${capo}`
-              : chordName(selection, accidental)
-          }
+        <div
+          id="chord-steps"
+          className={`selector__steps${selectorOpen ? '' : ' selector__steps--collapsed'}`}
         >
           <KeySelector
             root={root}
@@ -115,7 +112,7 @@ export function App() {
             }}
           />
           <CapoSelector capo={capo} onSelect={(next) => dispatch({ type: 'SET_CAPO', capo: next })} />
-        </SelectorPanel>
+        </div>
 
         <ChordResult
           selection={selection}
