@@ -127,6 +127,10 @@ export function App() {
           onSelectVoicing={(index) => dispatch({ type: 'SELECT_VOICING', index })}
           favorite={isFavorite(selection)}
           onToggleFavorite={() => toggleFavorite(selection)}
+          onTranspose={(semitones) => dispatch({ type: 'TRANSPOSE', semitones })}
+          onToggleQuality={() =>
+            dispatch({ type: 'SELECT_QUALITY', quality: quality === 'minor' ? 'major' : 'minor' })
+          }
         />
       </main>
 

@@ -1,5 +1,6 @@
 import type { Accidental } from '../domain/chord/catalog';
 import { coerceTension } from '../domain/chord/catalog';
+import { transposeSelection } from '../domain/chord/transpose';
 import type { ChordSelection, Quality, Root, Tension } from '../domain/chord/types';
 
 export interface ChordState extends ChordSelection {
@@ -18,6 +19,7 @@ export type ChordAction =
   | { type: 'SELECT_VOICING'; index: number }
   | { type: 'SET_ACCIDENTAL'; accidental: Accidental }
   | { type: 'SET_CAPO'; capo: number }
+  | { type: 'TRANSPOSE'; semitones: number }
   | { type: 'APPLY_SELECTION'; selection: ChordSelection };
 
 export const initialChordState: ChordState = {
@@ -33,6 +35,14 @@ export function chordReducer(state: ChordState, action: ChordAction): ChordState
   switch (action.type) {
     case 'SELECT_ROOT':
       return { ...state, root: action.root, voicingIndex: 0 };
+
+    case 'TRANSPOSE':
+      // 隣のキーへ移るだけなので、メジャー / マイナーとテンションは引き継ぐ
+      return {
+        ...state,
+        ...transposeSelection({ root: state.root, quality: state.quality, tension: state.tension }, action.semitones),
+        voicingIndex: 0,
+      };
 
     case 'SELECT_QUALITY':
       return {

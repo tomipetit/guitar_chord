@@ -10,6 +10,7 @@ import {
   type Voicing,
 } from '../../domain/voicing/types';
 import { useChordPlayer } from '../../platform/audio/useChordPlayer';
+import { useSwipe } from '../../platform/gesture/useSwipe';
 import { FavoriteButton } from '../controls/FavoriteButton';
 import { PlaybackControls } from '../controls/PlaybackControls';
 import { ChordDiagram } from '../diagram/ChordDiagram';
@@ -25,6 +26,9 @@ interface Props {
   onSelectVoicing: (index: number) => void;
   favorite: boolean;
   onToggleFavorite: () => void;
+  /** 半音単位でキーを移す。スワイプと左右ボタンの両方から呼ぶ */
+  onTranspose: (semitones: number) => void;
+  onToggleQuality: () => void;
 }
 
 export function ChordResult({
@@ -37,6 +41,8 @@ export function ChordResult({
   onSelectVoicing,
   favorite,
   onToggleFavorite,
+  onTranspose,
+  onToggleQuality,
 }: Props) {
   const type = chordTypeOf(selection);
   const name = chordName(selection, accidental);
@@ -45,11 +51,18 @@ export function ChordResult({
   const tones = chordTones(selection.root, type);
 
   const { supported, playing, playChord, pluckString, stop } = useChordPlayer();
+  // 左スワイプで次のキー（高い方）、右スワイプで前のキー
+  const swipe = useSwipe({
+    onSwipeLeft: () => onTranspose(1),
+    onSwipeRight: () => onTranspose(-1),
+  });
 
   // 表示するフォームが変わったら鳴っている音は止める
   useEffect(() => stop, [voicing, stop]);
 
   const handlePluckString = (stringIndex: number) => {
+    // スワイプの終わりに発生する click で弦が鳴らないようにする
+    if (swipe.swiped.current) return;
     const fret = voicing.frets[stringIndex];
     if (fret === null) return;
     void pluckString(OPEN_STRING_MIDI[stringIndex] + capo + fret);
@@ -59,6 +72,15 @@ export function ChordResult({
     <section className="result">
       <div className="result__heading">
         <h2 className="result__name">{name}</h2>
+        <button
+          type="button"
+          className="minor-toggle"
+          aria-pressed={selection.quality === 'minor'}
+          aria-label={selection.quality === 'minor' ? 'メジャーに切り替え' : 'マイナーに切り替え'}
+          onClick={onToggleQuality}
+        >
+          minor
+        </button>
         <FavoriteButton active={favorite} chordLabel={name} onToggle={onToggleFavorite} />
       </div>
 
@@ -69,12 +91,35 @@ export function ChordResult({
         </p>
       )}
 
-      <ChordDiagram
-        voicing={voicing}
-        chordLabel={name}
-        onPluckString={supported ? handlePluckString : undefined}
-        capo={capo}
-      />
+      <div className="stage">
+        <button
+          type="button"
+          className="stage__step"
+          aria-label="半音下げる"
+          onClick={() => onTranspose(-1)}
+        >
+          ‹
+        </button>
+
+        {/* 横スワイプでも前後のキーに移れる */}
+        <div className="stage__swipe" {...swipe.handlers}>
+          <ChordDiagram
+            voicing={voicing}
+            chordLabel={name}
+            onPluckString={supported ? handlePluckString : undefined}
+            capo={capo}
+          />
+        </div>
+
+        <button
+          type="button"
+          className="stage__step"
+          aria-label="半音上げる"
+          onClick={() => onTranspose(1)}
+        >
+          ›
+        </button>
+      </div>
 
       <p className="result__frets">{fretsToText(voicing.frets)}</p>
 
