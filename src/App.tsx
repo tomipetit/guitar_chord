@@ -44,7 +44,11 @@ export function App() {
           <TensionSelector
             quality={quality}
             tension={tension}
-            onSelect={(next) => dispatch({ type: 'SELECT_TENSION', tension: next })}
+            onSelect={(next) => {
+              dispatch({ type: 'SELECT_TENSION', tension: next });
+              // Step3 まで選べばコードが確定するので、指定エリアを畳んで表示に譲る
+              setSelectorOpen(false);
+            }}
           />
         </SelectorPanel>
 

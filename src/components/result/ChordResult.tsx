@@ -1,8 +1,16 @@
+import { useEffect } from 'react';
 import type { Accidental } from '../../domain/chord/catalog';
 import { chordName, rootLabel } from '../../domain/chord/naming';
 import { DEGREE_LABELS, chordTones } from '../../domain/chord/notes';
 import { chordTypeOf, type ChordSelection } from '../../domain/chord/types';
-import { fretsToText, type Voicing } from '../../domain/voicing/types';
+import {
+  OPEN_STRING_MIDI,
+  fretsToText,
+  voicingMidiNotes,
+  type Voicing,
+} from '../../domain/voicing/types';
+import { useChordPlayer } from '../../platform/audio/useChordPlayer';
+import { PlaybackControls } from '../controls/PlaybackControls';
 import { ChordDiagram } from '../diagram/ChordDiagram';
 
 interface Props {
@@ -26,11 +34,26 @@ export function ChordResult({
   const degrees = DEGREE_LABELS[type];
   const tones = chordTones(selection.root, type);
 
+  const { supported, playing, playChord, pluckString, stop } = useChordPlayer();
+
+  // 表示するフォームが変わったら鳴っている音は止める
+  useEffect(() => stop, [voicing, stop]);
+
+  const handlePluckString = (stringIndex: number) => {
+    const fret = voicing.frets[stringIndex];
+    if (fret === null) return;
+    void pluckString(OPEN_STRING_MIDI[stringIndex] + fret);
+  };
+
   return (
     <section className="result">
       <h2 className="result__name">{name}</h2>
 
-      <ChordDiagram voicing={voicing} chordLabel={name} />
+      <ChordDiagram
+        voicing={voicing}
+        chordLabel={name}
+        onPluckString={supported ? handlePluckString : undefined}
+      />
 
       <p className="result__frets">{fretsToText(voicing.frets)}</p>
 
@@ -49,6 +72,14 @@ export function ChordResult({
             </button>
           ))}
         </div>
+      )}
+
+      {supported && (
+        <PlaybackControls
+          playing={playing}
+          onPlay={(mode) => void playChord(voicingMidiNotes(voicing).map((n) => n.midi), mode)}
+          onStop={stop}
+        />
       )}
 
       <dl className="tones">

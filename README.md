@@ -48,7 +48,7 @@ npx wrangler pages deploy dist --project-name guitar-chord
 
 - [x] Phase 0: プロジェクト雛形・テスト・デプロイ設定
 - [x] Phase 1: コード選択 UI とダイアグラム表示（スマホではコード指定エリアを開閉式にして表示領域を確保）
-- [ ] Phase 2: Web Audio API による音の確認
+- [x] Phase 2: Web Audio API による音の確認（ストローク / アルペジオ / 同時、弦の個別タップ）
 - [ ] Phase 3: 音声入力（「いーまいなー」→ Em）
 - [ ] Phase 4: 表示の作り込み
 
@@ -63,7 +63,21 @@ npx wrangler pages deploy dist --project-name guitar-chord
 `src/domain/voicing/generate.test.ts` が全 `root × quality × tension` の組み合わせについて、
 「構成音以外を鳴らしていないか」「ルートと性格音を含むか」「表示幅に収まるか」「運指が破綻していないか」を検証している。
 
+## 音の鳴らし方
+
+音源ファイルは持たず、**Karplus-Strong 法**で撥弦音をその場で合成している（`src/platform/audio/pluck.ts`）。
+ノイズを 1 周期ぶん詰めた遅延線をローパス付きで循環させると、任意のピッチの弦の音が得られる。
+
+- `src/platform/audio/player.ts` — AudioContext の遅延生成（iOS の自動再生制限対策）、
+  ストローク / アルペジオ / 同時の発音スケジュール、フェードアウト付きの停止
+- `src/platform/audio/useChordPlayer.ts` — React から使うためのフック
+- ダイアグラムの弦をタップすると、その弦の音だけを鳴らせる
+
+`src/platform/audio/pluck.test.ts` が、生成波形が自己相関で狙ったピッチの周期になっていること、
+減衰すること、末尾が振幅 0 で終わる（クリックノイズが出ない）ことを検証している。
+
 ## 既知の簡略化
 
 - 音名の表記は異名同音をまとめている（例: B♭m7♭5 の ♭5 は理論上 F♭ だが `E` と表示）
 - テンションは `7 / M7 / 6 / sus4 / m7 / m7♭5` に絞っている（9th 系・dim・aug は未対応）
+- ダイアグラムの弦タップはポインタ操作専用（キーボードからは再生ボタンでコード全体を鳴らす）

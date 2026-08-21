@@ -217,7 +217,10 @@ body {
 
 .chip:focus-visible,
 .toggle__button:focus-visible,
-.forms__tab:focus-visible {
+.forms__tab:focus-visible,
+.playback__play:focus-visible,
+.playback__mode:focus-visible,
+.selector__toggle:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -351,6 +354,78 @@ body {
 .forms__tab[aria-selected='true'] {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ---- 再生 ---- */
+
+.playback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.playback__play {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.playback__icon {
+  font-size: 0.75rem;
+}
+
+.playback__modes {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.playback__mode {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.playback__mode[aria-pressed='true'] {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+/* 弦ごとのタップ領域 */
+.diagram__hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.diagram__hit:active {
+  fill: rgba(255, 255, 255, 0.08);
+}
+
+@media (hover: hover) {
+  .diagram__hit:hover {
+    fill: rgba(255, 255, 255, 0.04);
+  }
 }
 
 /* ---- 構成音 ---- */

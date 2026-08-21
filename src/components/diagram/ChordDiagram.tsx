@@ -20,9 +20,11 @@ const fretCenterY = (offset: number) => PADDING_TOP + (offset + 0.5) * FRET_GAP;
 interface Props {
   voicing: Voicing;
   chordLabel: string;
+  /** 弦をタップしたとき（0 = 6弦）。ミュート弦では呼ばれない */
+  onPluckString?: (stringIndex: number) => void;
 }
 
-export function ChordDiagram({ voicing, chordLabel }: Props) {
+export function ChordDiagram({ voicing, chordLabel, onPluckString }: Props) {
   const { frets, fingers, barres, baseFret } = voicing;
   const isOpenPosition = baseFret === 1;
 
@@ -122,6 +124,24 @@ export function ChordDiagram({ voicing, chordLabel }: Props) {
           </g>
         );
       })}
+
+      {/* 弦ごとのタップ領域。再生ボタンで全体は鳴らせるので、補助的な操作として扱う */}
+      {onPluckString &&
+        frets.map((fret, i) =>
+          fret === null ? null : (
+            <rect
+              key={`hit-${i}`}
+              className="diagram__hit"
+              x={stringX(i) - STRING_GAP / 2}
+              y={PADDING_TOP - 24}
+              width={STRING_GAP}
+              height={GRID_HEIGHT + 24}
+              rx={6}
+              aria-hidden="true"
+              onClick={() => onPluckString(i)}
+            />
+          ),
+        )}
     </svg>
   );
 }
